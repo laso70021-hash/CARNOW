@@ -57,7 +57,7 @@ export function Navbar() {
             </span>
             <span className="hidden sm:inline text-slate-500">•</span>
             <span className="hidden sm:inline text-slate-400">
-              Hotline: <strong className="text-white">+255 770 565 656</strong>
+              Hotline: <strong className="text-white">+255 674 766 586</strong>
             </span>
           </div>
 
@@ -135,11 +135,8 @@ export function Navbar() {
             <Link href="/services" className="hover:text-red-600 transition">
               Services
             </Link>
-            <Link href="/pricing" className="hover:text-red-600 transition text-red-600 flex items-center gap-1">
-              <span>Pricing</span>
-              <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.2 rounded-full font-bold">
-                6 Plans
-              </span>
+            <Link href="/pricing" className="hover:text-red-600 transition">
+              Pricing
             </Link>
             <Link href="/dealers" className="hover:text-red-600 transition">
               Dealers
@@ -188,104 +185,123 @@ export function Navbar() {
               </Link>
             )}
 
-            {/* User Profile / Dashboard Link */}
+            {/* User Profile & Direct Sign Out */}
             {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2.5 p-1.5 rounded-full hover:bg-slate-100 transition border border-slate-200"
-                >
-                  <div className="relative w-8 h-8 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-xs overflow-hidden">
-                    {user.avatarUrl ? (
-                      <Image src={user.avatarUrl} alt={user.name} fill className="object-cover" sizes="32px" />
-                    ) : (
-                      user.name.charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <div className="hidden md:block text-left pr-1">
-                    <p className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[100px]">
-                      {user.name}
-                    </p>
-                    <span className="text-[10px] uppercase font-semibold text-red-600 tracking-wider">
-                      {user.role}
-                    </span>
-                  </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden md:block" />
-                </button>
-
-                {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2">
-                    <div className="px-4 py-2 border-b border-slate-100">
-                      <p className="text-xs font-bold text-slate-900">{user.name}</p>
-                      <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
-                      <span className="inline-block mt-1 text-[10px] bg-red-50 text-red-600 px-2 py-0.5 rounded font-semibold uppercase">
-                        {user.role} Dashboard
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <button
+                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                    className="flex items-center gap-2 p-1 sm:p-1.5 rounded-full hover:bg-slate-100 transition border border-slate-200"
+                  >
+                    <div className="relative w-8 h-8 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-xs overflow-hidden">
+                      {user.avatarUrl ? (
+                        <Image src={user.avatarUrl} alt={user.name} fill className="object-cover" sizes="32px" />
+                      ) : (
+                        user.name.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <div className="hidden md:block text-left pr-1">
+                      <p className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[100px]">
+                        {user.name}
+                      </p>
+                      <span className="text-[10px] uppercase font-semibold text-red-600 tracking-wider">
+                        {user.role}
                       </span>
                     </div>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden md:block" />
+                  </button>
 
-                    {user.role === "admin" && (
+                  {userDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                      <div className="px-4 py-2 border-b border-slate-100">
+                        <p className="text-xs font-bold text-slate-900">{user.name}</p>
+                        <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <span className="text-[10px] bg-red-50 text-red-600 px-2 py-0.5 rounded font-semibold uppercase">
+                            {user.role} Dashboard
+                          </span>
+                          {user.status === "on_hold" && (
+                            <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold uppercase">
+                              On Hold
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {user.role === "admin" && (
+                        <Link
+                          href="/admin/dashboard"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-red-600" />
+                          Admin Dashboard
+                        </Link>
+                      )}
+
+                      {user.role === "seller" && (
+                        <>
+                          <Link
+                            href="/seller/dashboard"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Building2 className="w-4 h-4 text-red-600" />
+                            Seller Dashboard
+                          </Link>
+                          <Link
+                            href="/seller/dashboard"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
+                          >
+                            <PlusCircle className="w-4 h-4 text-emerald-600" />
+                            Add Vehicle Listing
+                          </Link>
+                          <Link
+                            href="/seller/dashboard"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
+                          >
+                            <DollarSign className="w-4 h-4 text-amber-600" />
+                            My Subscription
+                          </Link>
+                        </>
+                      )}
+
                       <Link
-                        href="/admin/dashboard"
+                        href="/account"
                         onClick={() => setUserDropdownOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
                       >
-                        <ShieldCheck className="w-4 h-4 text-red-600" />
-                        Admin Dashboard
+                        <User className="w-4 h-4 text-blue-600" />
+                        Buyer Profile & Orders
                       </Link>
-                    )}
 
-                    {user.role === "seller" && (
-                      <>
-                        <Link
-                          href="/seller/dashboard"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
-                        >
-                          <Building2 className="w-4 h-4 text-red-600" />
-                          Seller Dashboard
-                        </Link>
-                        <Link
-                          href="/seller/dashboard/vehicles/new"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
-                        >
-                          <PlusCircle className="w-4 h-4 text-emerald-600" />
-                          Add Vehicle Listing
-                        </Link>
-                        <Link
-                          href="/seller/dashboard/subscription"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
-                        >
-                          <DollarSign className="w-4 h-4 text-amber-600" />
-                          My Subscription
-                        </Link>
-                      </>
-                    )}
+                      <div className="border-t border-slate-100 my-1" />
 
-                    <Link
-                      href="/account"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
-                    >
-                      <User className="w-4 h-4 text-blue-600" />
-                      Buyer Profile & Orders
-                    </Link>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 text-left"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
 
-                    <div className="border-t border-slate-100 my-1" />
-
-                    <button
-                      onClick={() => {
-                        logout();
-                        setUserDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 text-left"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Sign Out
-                    </button>
-                  </div>
-                )}
+                {/* Clear, Visible Direct Sign Out Button */}
+                <button
+                  onClick={() => logout()}
+                  className="flex items-center gap-1 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-700 text-xs font-bold transition border border-slate-200"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-red-600" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -312,7 +328,7 @@ export function Navbar() {
 
             {/* Visit Showroom / Sell Car CTA */}
             <Link
-              href={user?.role === "seller" ? "/seller/dashboard/vehicles/new" : "/pricing"}
+              href={user?.role === "seller" ? "/seller/dashboard" : "/pricing"}
               className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shadow-md hover:shadow-lg"
             >
               <span>{user?.role === "seller" ? "+ Add Vehicle" : "Sell Your Car"}</span>
@@ -348,9 +364,9 @@ export function Navbar() {
             <Link
               href="/pricing"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md font-semibold text-red-600 hover:bg-red-50"
+              className="block px-3 py-2 rounded-md font-semibold text-slate-800 hover:bg-slate-50"
             >
-              Dealer Subscription Plans (6 Tiers)
+              Pricing
             </Link>
             <Link
               href="/dealers"

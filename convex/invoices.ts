@@ -132,6 +132,15 @@ export const adminVerifyPayment = mutation({
         }
       }
 
+      // Also update user status from "on_hold" to "active"
+      const userDoc = await ctx.db.get(invoice.userId);
+      if (userDoc && userDoc.status === "on_hold") {
+        await ctx.db.patch(userDoc._id, {
+          status: "active",
+          updatedAt: Date.now(),
+        });
+      }
+
       // Send confirmation notification
       await ctx.db.insert("notifications", {
         userId: invoice.userId,

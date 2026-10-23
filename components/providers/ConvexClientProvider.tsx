@@ -48,12 +48,13 @@ export interface AuthUser {
   role: "admin" | "seller" | "buyer";
   phone?: string;
   avatarUrl?: string;
+  status?: string;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
-  login: (email: string, pass: string) => Promise<{ success: boolean; role: string }>;
+  login: (email: string, pass: string) => Promise<{ success: boolean; role: string; status?: string }>;
   register: (data: {
     name: string;
     email: string;
@@ -63,7 +64,8 @@ interface AuthContextType {
     businessName?: string;
     businessLocation?: string;
     businessDescription?: string;
-  }) => Promise<{ success: boolean; role: string }>;
+    planSlug?: string;
+  }) => Promise<{ success: boolean; role: string; status?: string }>;
   logout: () => void;
   switchUser: (role: "admin" | "seller" | "buyer") => void;
 }
@@ -160,13 +162,14 @@ function AppProvidersInner({ children }: { children: ReactNode }) {
       role: res.role as "admin" | "seller" | "buyer",
       phone: res.phone,
       avatarUrl: res.avatarUrl,
+      status: res.status,
     };
     setUser(authUser);
     if (typeof window !== "undefined") {
       localStorage.setItem("swahivo_session", JSON.stringify(authUser));
       window.dispatchEvent(new Event("swahivo_session_change"));
     }
-    return { success: true, role: res.role };
+    return { success: true, role: res.role, status: res.status };
   };
 
   const register = async (data: {
@@ -178,6 +181,7 @@ function AppProvidersInner({ children }: { children: ReactNode }) {
     businessName?: string;
     businessLocation?: string;
     businessDescription?: string;
+    planSlug?: string;
   }) => {
     const res = await registerMutation(data);
     const authUser: AuthUser = {
@@ -186,13 +190,14 @@ function AppProvidersInner({ children }: { children: ReactNode }) {
       email: res.email,
       role: res.role as "admin" | "seller" | "buyer",
       phone: res.phone,
+      status: res.status,
     };
     setUser(authUser);
     if (typeof window !== "undefined") {
       localStorage.setItem("swahivo_session", JSON.stringify(authUser));
       window.dispatchEvent(new Event("swahivo_session_change"));
     }
-    return { success: true, role: res.role };
+    return { success: true, role: res.role, status: res.status };
   };
 
   const logout = useCallback(() => {

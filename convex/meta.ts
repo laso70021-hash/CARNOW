@@ -140,3 +140,68 @@ export const requestPromotion = mutation({
     return { success: true, id };
   },
 });
+
+// Newsletter Subscriptions
+export const subscribeNewsletter = mutation({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const emailNorm = args.email.trim().toLowerCase();
+    if (!emailNorm.includes("@")) {
+      throw new Error("Please enter a valid email address.");
+    }
+    const existing = await ctx.db
+      .query("newsletterSubscriptions")
+      .withIndex("by_email", (q) => q.eq("email", emailNorm))
+      .first();
+
+    if (!existing) {
+      await ctx.db.insert("newsletterSubscriptions", {
+        email: emailNorm,
+        status: "active",
+        createdAt: Date.now(),
+      });
+    }
+    return { success: true };
+  },
+});
+
+export const listNewsletterSubscriptions = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("newsletterSubscriptions").order("desc").collect();
+  },
+});
+
+// Add Accessory Mutation
+export const createAccessory = mutation({
+  args: {
+    title: v.string(),
+    category: v.string(),
+    priceTzs: v.number(),
+    condition: v.string(),
+    image: v.string(),
+    sellerId: v.optional(v.id("users")),
+    sellerName: v.optional(v.string()),
+    stock: v.number(),
+    description: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const id = await ctx.db.insert("accessories", {
+      title: args.title,
+      category: args.category,
+      priceTzs: args.priceTzs,
+      condition: args.condition,
+      image: args.image,
+      sellerId: args.sellerId,
+      sellerName: args.sellerName || "Swahivo Verified Dealer",
+      stock: args.stock,
+      description: args.description,
+      status: "active",
+      createdAt: Date.now(),
+    });
+    return { success: true, id };
+  },
+});
+

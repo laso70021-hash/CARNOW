@@ -98,8 +98,8 @@ export const getVehicleBySlug = query({
     return {
       ...vehicle,
       sellerName: seller?.name || "Verified Dealer",
-      sellerPhone: seller?.phone || "+255 770 565 656",
-      sellerEmail: seller?.email || "info@swahivo.com",
+      sellerPhone: seller?.phone || "+255 674 766 586",
+      sellerEmail: seller?.email || "hello@swahivo.com",
       dealership: dealer
         ? {
             businessName: dealer.businessName,
@@ -161,6 +161,7 @@ export const createVehicle = mutation({
     location: v.string(),
     description: v.string(),
     features: v.array(v.string()),
+    optionalServices: v.optional(v.array(v.string())),
     images: v.array(v.string()),
   },
   handler: async (ctx, args) => {
@@ -223,6 +224,7 @@ export const createVehicle = mutation({
       location: args.location,
       description: args.description,
       features: args.features,
+      optionalServices: args.optionalServices || [],
       sellerId: args.sellerId,
       dealerId: dealerProfile?._id,
       status: "pending_approval", // Requires admin review
@@ -268,6 +270,7 @@ export const updateVehicle = mutation({
     location: v.string(),
     description: v.string(),
     features: v.array(v.string()),
+    optionalServices: v.optional(v.array(v.string())),
     images: v.array(v.string()),
   },
   handler: async (ctx, args) => {
@@ -297,6 +300,7 @@ export const updateVehicle = mutation({
       location: args.location,
       description: args.description,
       features: args.features,
+      optionalServices: args.optionalServices,
       images: args.images,
       primaryImage,
       updatedAt: Date.now(),

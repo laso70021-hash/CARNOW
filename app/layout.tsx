@@ -3,18 +3,18 @@ import "./globals.css";
 import { ConvexClientProvider } from "@/components/providers/ConvexClientProvider";
 
 export const metadata: Metadata = {
-  title: "Swahivo Cars - Dealership SaaS & Marketplace",
+  title: "Swahivo Company - Automotive Marketplace & Dealership SaaS",
   description:
     "Multi-vendor automotive marketplace and dealership SaaS for Tanzania and Zanzibar with live inventory, buyer/seller dashboards, enquiries, bookings, and subscription plans.",
   openGraph: {
-    title: "Swahivo Cars - Dealership SaaS & Marketplace",
+    title: "Swahivo Company - Automotive Marketplace & Dealership SaaS",
     description:
       "Multi-vendor automotive marketplace and dealership SaaS for Tanzania and Zanzibar with live inventory, buyer/seller dashboards, enquiries, bookings, and subscription plans.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Swahivo Cars - Dealership SaaS & Marketplace",
+    title: "Swahivo Company - Automotive Marketplace & Dealership SaaS",
     description:
       "Multi-vendor automotive marketplace and dealership SaaS for Tanzania and Zanzibar with live inventory, buyer/seller dashboards, enquiries, bookings, and subscription plans.",
   },

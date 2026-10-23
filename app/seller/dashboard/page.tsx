@@ -32,6 +32,12 @@ import {
   LogOut,
   Bell,
   Search,
+  Upload,
+  Check,
+  Trash2,
+  ShieldCheck,
+  Wrench,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -86,6 +92,102 @@ export default function SellerDashboardPage() {
   const setVehicleStatusMutation = useMutation(api.vehicles.setVehicleStatus);
   const addEnquiryReplyMutation = useMutation(api.enquiries.addEnquiryMessage);
 
+  // Constants for Features & Equipment and Optional Services
+  const FEATURE_CATEGORIES = [
+    {
+      category: "Safety & Security",
+      items: [
+        "Anti-lock Braking System (ABS)",
+        "360° Panoramic Surround Camera",
+        "Blind Spot Monitoring (BSM)",
+        "Electronic Stability Control (ESC)",
+        "Front & Curtain Airbags (8+)",
+        "Lane Departure Warning & Keep Assist",
+        "ISOFIX Child Seat Anchors",
+        "Front & Rear Parking Sensors",
+        "Engine Immobilizer & Anti-Theft Alarm",
+      ],
+    },
+    {
+      category: "Comfort & Interior",
+      items: [
+        "Premium Leather Seats",
+        "Dual / Tri-Zone Automatic Climate Control",
+        "Panoramic Electric Sunroof",
+        "Heated & Ventilated Front Seats",
+        "Power Adjustable Memory Seats",
+        "Electric Tailgate / Smart Trunk",
+        "Keyless Entry & Push-Button Start",
+        "Ambient Interior LED Lighting",
+        "Rear Passenger AC Vents & Sunshades",
+      ],
+    },
+    {
+      category: "Audio, Display & Tech",
+      items: [
+        "Apple CarPlay & Android Auto",
+        "12.3-inch HD Touchscreen Infotainment",
+        "Integrated GPS Satellite Navigation",
+        "Wireless Smartphone Charging Pad",
+        "Premium Surround Sound System",
+        "Bluetooth Hands-Free & Audio Streaming",
+        "Multi-Port Fast-Charge USB-C Ports",
+        "Head-Up Display (HUD)",
+      ],
+    },
+    {
+      category: "Performance & Off-Road",
+      items: [
+        "Full-Time 4WD / All-Wheel Drive",
+        "Electronic Rear Differential Lock",
+        "Multi-Terrain Select (MTS) & Crawl Control",
+        "Adaptive Height-Adjustable Air Suspension",
+        "Heavy-Duty Tow Hitch & Trailer Wiring",
+        "Hill Descent Control (HDC)",
+        "Underbody Heavy-Duty Skid Plates",
+        "Sport / Eco / Normal Drive Modes",
+      ],
+    },
+    {
+      category: "TRA & Import Compliance",
+      items: [
+        "100% TRA Customs Duty Fully Cleared",
+        "Genuine Tanzania / Zanzibar Registration Logbook",
+        "150-Point Pre-Purchase Inspection Passed",
+        "Export Certificate & JEVIC Verified",
+        "Single Owner History & Genuine Mileage",
+        "Clear Title Ready for Immediate Transfer",
+      ],
+    },
+  ];
+
+  const OPTIONAL_SERVICES_DATA = [
+    {
+      id: "tra_registration",
+      title: "TRA Registration & Title Transfer Service",
+      description: "Fast, stress-free vehicle registration, logbook transfer, custom duty clearance, and number plate issuance across Tanzania and Zanzibar.",
+      price: "From TZS 250,000",
+    },
+    {
+      id: "inspection_150",
+      title: "Comprehensive Pre-Purchase Inspection (150 Points)",
+      description: "Detailed mechanical, computerized OBD diagnostic, structural chassis, engine compression, and paint thickness evaluation by certified engineers.",
+      price: "TZS 180,000",
+    },
+    {
+      id: "carrier_shipping",
+      title: "Inter-City Vehicle Carrier & Shipping (Dar to Zanzibar)",
+      description: "Insured vehicle transport between Dar es Salaam, Zanzibar ports, Arusha, Mwanza, Dodoma, and Mbeya on hydraulic flatbed trailers.",
+      price: "From TZS 450,000",
+    },
+    {
+      id: "scheduled_maintenance",
+      title: "Scheduled Maintenance & Minor/Major Service",
+      description: "Synthetic engine oil replacement, genuine oil filter, spark plugs, brake pads check, air filters, and suspension greasing.",
+      price: "From TZS 150,000",
+    },
+  ];
+
   // New Vehicle Form State
   const [vTitle, setVTitle] = useState("");
   const [vBrand, setVBrand] = useState("Toyota");
@@ -100,8 +202,24 @@ export default function SellerDashboardPage() {
   const [vPrice, setVPrice] = useState(45000000);
   const [vLocation, setVLocation] = useState("Dar es Salaam");
   const [vDesc, setVDesc] = useState("");
-  const [vFeatures, setVFeatures] = useState("TRA Documentation, Leather Seats, Sunroof, 360 Camera");
-  const [vImageUrl, setVImageUrl] = useState("/assets/aistudio/Swahivo_Dealership_at_Sunset_e85cb77e.png");
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([
+    "100% TRA Customs Duty Fully Cleared",
+    "Genuine Tanzania / Zanzibar Registration Logbook",
+    "Premium Leather Seats",
+    "Panoramic Electric Sunroof",
+    "360° Panoramic Surround Camera",
+    "Apple CarPlay & Android Auto",
+  ]);
+  const [customFeature, setCustomFeature] = useState("");
+  const [vImages, setVImages] = useState<string[]>([
+    "/assets/aistudio/Swahivo_Dealership_at_Sunset_e85cb77e.png",
+  ]);
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [selectedOptionalServices, setSelectedOptionalServices] = useState<string[]>([
+    "TRA Registration & Title Transfer Service",
+    "Comprehensive Pre-Purchase Inspection (150 Points)",
+  ]);
 
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -120,6 +238,62 @@ export default function SellerDashboardPage() {
     amountTzs: number;
   } | null>(null);
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadingImages(true);
+    const promises: Promise<string>[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      promises.push(
+        new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            resolve(event.target?.result as string);
+          };
+          reader.readAsDataURL(file);
+        })
+      );
+    }
+    Promise.all(promises).then((dataUrls) => {
+      setVImages((prev) => [...prev, ...dataUrls]);
+      setUploadingImages(false);
+    });
+  };
+
+  const handleAddImageUrl = () => {
+    if (imageUrlInput.trim()) {
+      setVImages((prev) => [...prev, imageUrlInput.trim()]);
+      setImageUrlInput("");
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setVImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleToggleFeature = (feat: string) => {
+    setSelectedFeatures((prev) =>
+      prev.includes(feat) ? prev.filter((f) => f !== feat) : [...prev, feat]
+    );
+  };
+
+  const handleAddCustomFeature = () => {
+    const trimmed = customFeature.trim();
+    if (trimmed && !selectedFeatures.includes(trimmed)) {
+      setSelectedFeatures((prev) => [...prev, trimmed]);
+      setCustomFeature("");
+    }
+  };
+
+  const handleToggleService = (serviceTitle: string) => {
+    setSelectedOptionalServices((prev) =>
+      prev.includes(serviceTitle)
+        ? prev.filter((s) => s !== serviceTitle)
+        : [...prev, serviceTitle]
+    );
+  };
+
   const handleCreateVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!sellerId) return;
@@ -128,7 +302,6 @@ export default function SellerDashboardPage() {
     setFormSuccess(null);
 
     try {
-      const featArray = vFeatures.split(",").map((s) => s.trim()).filter(Boolean);
       await createVehicleMutation({
         sellerId,
         title: vTitle.trim(),
@@ -144,8 +317,9 @@ export default function SellerDashboardPage() {
         priceTzs: Number(vPrice),
         location: vLocation,
         description: vDesc.trim(),
-        features: featArray,
-        images: [vImageUrl],
+        features: selectedFeatures,
+        optionalServices: selectedOptionalServices,
+        images: vImages.length > 0 ? vImages : ["/assets/aistudio/Swahivo_Dealership_at_Sunset_e85cb77e.png"],
       });
 
       setFormSuccess("Vehicle listing submitted! It is now pending admin approval before going live.");
@@ -403,11 +577,49 @@ export default function SellerDashboardPage() {
               <span>View My Store</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
+
+            <button
+              onClick={() => logout()}
+              className="px-3.5 py-2 bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-200"
+              title="Sign Out"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
           </div>
         </header>
 
         {/* Dashboard Content */}
         <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+          {/* Account On-Hold Alert Banner */}
+          {user?.status === "on_hold" && (
+            <div className="p-5 bg-amber-50 border-2 border-amber-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-pulse-subtle">
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 bg-amber-100 text-amber-800 rounded-xl shrink-0 mt-0.5">
+                  <AlertCircle className="w-5 h-5 text-amber-700" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-amber-950">
+                      Seller Account Status: ON HOLD (Pending Payment & Admin Approval)
+                    </h3>
+                    <span className="px-2 py-0.5 bg-amber-200 text-amber-900 rounded text-[10px] font-black uppercase tracking-wider">
+                      Pending Activation
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                    Your dealer plan account is currently on hold. You can draft listings and manage settings now, but your vehicles and dealer storefront will only become publicly active once your payment reference is reviewed and approved by Swahivo admins.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveTab("subscription")}
+                className="px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-bold shrink-0 transition shadow-sm"
+              >
+                View Invoices & Pay
+              </button>
+            </div>
+          )}
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
             <>
@@ -803,7 +1015,89 @@ export default function SellerDashboardPage() {
                 </div>
               )}
 
-              <form onSubmit={handleCreateVehicle} className="space-y-4">
+              <form onSubmit={handleCreateVehicle} className="space-y-6">
+                {/* 1. Vehicle Photos Upload Section */}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-900">
+                        Vehicle Photos & Gallery ({vImages.length} attached)
+                      </label>
+                      <p className="text-[11px] text-slate-500">
+                        Upload real photos from your phone or device. The first image will be used as the primary cover photo.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <label
+                        htmlFor="vehicle-photo-upload"
+                        className="cursor-pointer px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition shadow-sm"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{uploadingImages ? "Uploading..." : "Upload Photos"}</span>
+                      </label>
+                      <input
+                        id="vehicle-photo-upload"
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Or Add by Image URL */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      type="url"
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      placeholder="Or paste an image web link (https://...)"
+                      className="flex-1 px-3 py-1.5 text-xs border border-slate-300 rounded-xl bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold"
+                    >
+                      Add URL
+                    </button>
+                  </div>
+
+                  {/* Image Thumbnails Gallery */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-2">
+                    {vImages.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className="relative aspect-4/3 rounded-xl overflow-hidden border-2 border-slate-200 bg-slate-200 group"
+                      >
+                        <Image
+                          src={img}
+                          alt={`Uploaded vehicle ${idx + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="150px"
+                        />
+                        {idx === 0 && (
+                          <span className="absolute top-1 left-1 bg-red-600 text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow">
+                            Primary
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(idx)}
+                          className="absolute top-1 right-1 p-1 bg-slate-900/80 hover:bg-red-600 text-white rounded-md opacity-80 group-hover:opacity-100 transition"
+                          title="Remove photo"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 2. Basic Specs */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Vehicle Listing Title</label>
                   <input
@@ -822,7 +1116,7 @@ export default function SellerDashboardPage() {
                     <select
                       value={vBrand}
                       onChange={(e) => setVBrand(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
                     >
                       <option value="Toyota">Toyota</option>
                       <option value="BMW">BMW</option>
@@ -831,6 +1125,12 @@ export default function SellerDashboardPage() {
                       <option value="Honda">Honda</option>
                       <option value="Land Rover">Land Rover</option>
                       <option value="Nissan">Nissan</option>
+                      <option value="Lexus">Lexus</option>
+                      <option value="Subaru">Subaru</option>
+                      <option value="Mitsubishi">Mitsubishi</option>
+                      <option value="Audi">Audi</option>
+                      <option value="Hyundai">Hyundai</option>
+                      <option value="Suzuki">Suzuki</option>
                     </select>
                   </div>
 
@@ -842,7 +1142,7 @@ export default function SellerDashboardPage() {
                       value={vModel}
                       onChange={(e) => setVModel(e.target.value)}
                       placeholder="e.g. Land Cruiser"
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
                     />
                   </div>
 
@@ -852,8 +1152,8 @@ export default function SellerDashboardPage() {
                       type="text"
                       value={vVariant}
                       onChange={(e) => setVVariant(e.target.value)}
-                      placeholder="e.g. 300 VXR"
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
+                      placeholder="e.g. 300 VXR / TX-L"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
                     />
                   </div>
                 </div>
@@ -864,7 +1164,7 @@ export default function SellerDashboardPage() {
                     <select
                       value={vCondition}
                       onChange={(e) => setVCondition(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
                     >
                       <option value="New">Brand New</option>
                       <option value="Used">Used</option>
@@ -879,7 +1179,7 @@ export default function SellerDashboardPage() {
                       required
                       value={vYear}
                       onChange={(e) => setVYear(Number(e.target.value))}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
                     />
                   </div>
 
@@ -890,7 +1190,7 @@ export default function SellerDashboardPage() {
                       required
                       value={vMileage}
                       onChange={(e) => setVMileage(Number(e.target.value))}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
                     />
                   </div>
 
@@ -899,13 +1199,14 @@ export default function SellerDashboardPage() {
                     <select
                       value={vLocation}
                       onChange={(e) => setVLocation(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
                     >
                       <option value="Dar es Salaam">Dar es Salaam</option>
                       <option value="Zanzibar">Zanzibar</option>
                       <option value="Arusha">Arusha</option>
                       <option value="Mwanza">Mwanza</option>
                       <option value="Dodoma">Dodoma</option>
+                      <option value="Mbeya">Mbeya</option>
                     </select>
                   </div>
                 </div>
@@ -916,7 +1217,7 @@ export default function SellerDashboardPage() {
                     <select
                       value={vFuel}
                       onChange={(e) => setVFuel(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
                     >
                       <option value="Diesel">Diesel</option>
                       <option value="Petrol">Petrol</option>
@@ -930,7 +1231,7 @@ export default function SellerDashboardPage() {
                     <select
                       value={vTransmission}
                       onChange={(e) => setVTransmission(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
                     >
                       <option value="Automatic">Automatic</option>
                       <option value="Manual">Manual</option>
@@ -944,21 +1245,131 @@ export default function SellerDashboardPage() {
                       required
                       value={vPrice}
                       onChange={(e) => setVPrice(Number(e.target.value))}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl font-bold text-red-600"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl font-bold text-red-600 bg-white"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Key Features (comma-separated)</label>
-                  <input
-                    type="text"
-                    value={vFeatures}
-                    onChange={(e) => setVFeatures(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl"
-                  />
+                {/* 3. Rich Equipment & Key Features (Item 9) */}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                        Equipment & Key Features ({selectedFeatures.length} selected)
+                      </h3>
+                      <p className="text-[11px] text-slate-500">
+                        Select features to highlight on your vehicle listing across safety, interior comfort, tech, and TRA compliance.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {FEATURE_CATEGORIES.map((catGroup) => (
+                      <div key={catGroup.category} className="space-y-1.5">
+                        <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">
+                          {catGroup.category}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {catGroup.items.map((item) => {
+                            const isSelected = selectedFeatures.includes(item);
+                            return (
+                              <button
+                                key={item}
+                                type="button"
+                                onClick={() => handleToggleFeature(item)}
+                                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1 border ${
+                                  isSelected
+                                    ? "bg-red-600 text-white border-red-600 font-semibold shadow-xs"
+                                    : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
+                                }`}
+                              >
+                                {isSelected ? (
+                                  <Check className="w-3 h-3 text-white" />
+                                ) : (
+                                  <Plus className="w-3 h-3 text-slate-400" />
+                                )}
+                                <span>{item}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add Custom Feature */}
+                  <div className="pt-2 border-t border-slate-200 flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={customFeature}
+                      onChange={(e) => setCustomFeature(e.target.value)}
+                      placeholder="Add custom feature (e.g. Snorkel, BF Goodrich All-Terrain Tires)..."
+                      className="flex-1 px-3 py-1.5 text-xs border border-slate-300 rounded-xl bg-white"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddCustomFeature();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomFeature}
+                      className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold"
+                    >
+                      Add Custom
+                    </button>
+                  </div>
                 </div>
 
+                {/* 4. Optional Value-Added Services (Item 4) */}
+                <div className="p-4 bg-red-50/50 rounded-2xl border border-red-200/70 space-y-3">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-red-700">
+                      <ShieldCheck className="w-4 h-4" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider">
+                        Dealer Value-Added Services (Optional for Buyer)
+                      </h3>
+                    </div>
+                    <p className="text-[11px] text-slate-600 mt-0.5">
+                      Check any optional Swahivo verified services you want to make available for buyers booking this vehicle.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {OPTIONAL_SERVICES_DATA.map((srv) => {
+                      const isChecked = selectedOptionalServices.includes(srv.title);
+                      return (
+                        <label
+                          key={srv.id}
+                          className={`p-3 rounded-xl border flex items-start gap-3 cursor-pointer transition ${
+                            isChecked
+                              ? "bg-white border-red-500 shadow-xs ring-1 ring-red-500"
+                              : "bg-white/80 border-slate-200 hover:border-slate-300"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleToggleService(srv.title)}
+                            className="mt-0.5 h-4 w-4 rounded text-red-600 focus:ring-red-500 border-slate-300"
+                          />
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-bold text-slate-900">{srv.title}</span>
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 bg-red-100 text-red-800 rounded shrink-0">
+                                {srv.price}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 leading-normal">{srv.description}</p>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 5. Description */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Description</label>
                   <textarea
@@ -966,17 +1377,18 @@ export default function SellerDashboardPage() {
                     required
                     value={vDesc}
                     onChange={(e) => setVDesc(e.target.value)}
-                    placeholder="Provide full details regarding TRA documentation, vehicle maintenance, service history..."
-                    className="w-full p-3 text-xs border border-slate-300 rounded-xl"
+                    placeholder="Provide full details regarding TRA documentation, vehicle maintenance, service history, inspection warranty..."
+                    className="w-full p-3 text-xs border border-slate-300 rounded-xl bg-white"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition shadow-md hover:shadow-lg disabled:opacity-50"
+                  className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {formLoading ? "Validating & Submitting..." : "Submit Vehicle for Approval"}
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{formLoading ? "Validating & Submitting..." : "Submit Vehicle for Approval"}</span>
                 </button>
               </form>
             </div>
@@ -1254,11 +1666,11 @@ export default function SellerDashboardPage() {
                 </div>
                 <div>
                   <span className="font-semibold text-slate-500">Phone:</span>
-                  <p className="text-slate-700">{dealerProfile?.phone || "+255 770 565 656"}</p>
+                  <p className="text-slate-700">{dealerProfile?.phone || "+255 674 766 586"}</p>
                 </div>
                 <div>
                   <span className="font-semibold text-slate-500">Email:</span>
-                  <p className="text-slate-700">{dealerProfile?.email || "auto.link@yahoo.com"}</p>
+                  <p className="text-slate-700">{dealerProfile?.email || "hello@swahivo.com"}</p>
                 </div>
                 <div>
                   <span className="font-semibold text-slate-500">Description:</span>

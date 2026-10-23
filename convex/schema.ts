@@ -78,6 +78,7 @@ export default defineSchema({
     enquiryCount: v.number(),
     images: v.array(v.string()), // URLs or storage IDs
     primaryImage: v.string(),
+    optionalServices: v.optional(v.array(v.string())),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -334,4 +335,11 @@ export default defineSchema({
     details: v.string(),
     timestamp: v.number(),
   }),
+
+  // Newsletter Subscriptions
+  newsletterSubscriptions: defineTable({
+    email: v.string(),
+    status: v.string(), // "active" | "unsubscribed"
+    createdAt: v.number(),
+  }).index("by_email", ["email"]),
 });

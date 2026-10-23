@@ -156,11 +156,11 @@ export function VehicleCard({ vehicle }: { vehicle: VehicleProps }) {
             </Link>
 
             <a
-              href={`https://wa.me/255770565656?text=${whatsappMessage}`}
+              href={`https://wa.me/255674766586?text=${whatsappMessage}`}
               target="_blank"
               rel="noreferrer"
               className="p-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl transition border border-emerald-200"
-              title="Quick WhatsApp Enquiry"
+              title="Quick WhatsApp Enquiry (+255 674 766 586)"
             >
               <MessageCircle className="w-4 h-4" />
             </a>

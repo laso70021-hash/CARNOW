@@ -7,13 +7,25 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/providers/ConvexClientProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { User, Mail, Lock, Phone, Building, MapPin, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  User,
+  Mail,
+  Lock,
+  Phone,
+  Building,
+  MapPin,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Sparkles,
+} from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
 
   const [role, setRole] = useState<"buyer" | "seller">("buyer");
+  const [selectedPlan, setSelectedPlan] = useState<string>("growth");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,6 +38,15 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const plans = [
+    { slug: "free", name: "Free Tier", price: "TZS 0", listings: "1 Car", auto: true },
+    { slug: "starter", name: "Starter", price: "TZS 45,000/mo", listings: "5 Cars", auto: false },
+    { slug: "growth", name: "Growth", price: "TZS 95,000/mo", listings: "15 Cars", auto: false },
+    { slug: "professional", name: "Professional", price: "TZS 185,000/mo", listings: "30 Cars", auto: false },
+    { slug: "business", name: "Business", price: "TZS 350,000/mo", listings: "70 Cars", auto: false },
+    { slug: "enterprise", name: "Enterprise", price: "TZS 650,000/mo", listings: "Unlimited", auto: false },
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -37,16 +58,22 @@ export default function RegisterPage() {
         password,
         role,
         phone,
+        planSlug: role === "seller" ? selectedPlan : undefined,
         businessName: role === "seller" ? businessName : undefined,
         businessLocation: role === "seller" ? businessLocation : undefined,
         businessDescription: role === "seller" ? businessDescription : undefined,
       });
 
-      setSuccess("Account registered! Redirecting to dashboard...");
+      if (role === "seller" && selectedPlan !== "free") {
+        setSuccess("Account created! Placed ON HOLD pending subscription payment & admin verification.");
+      } else {
+        setSuccess("Account registered successfully! Redirecting...");
+      }
+
       setTimeout(() => {
         if (res.role === "seller") router.push("/seller/dashboard");
         else router.push("/account");
-      }, 700);
+      }, 900);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to register");
@@ -65,7 +92,7 @@ export default function RegisterPage() {
             <div className="relative w-36 h-10 mx-auto">
               <Image
                 src="/assets/aistudio/logo_52dfade8.png"
-                alt="Swahivo"
+                alt="Swahivo Company"
                 fill
                 className="object-contain"
                 sizes="150px"
@@ -73,7 +100,7 @@ export default function RegisterPage() {
             </div>
             <h1 className="text-xl font-extrabold text-slate-900">Create Swahivo Account</h1>
             <p className="text-xs text-slate-500">
-              Join as a car buyer or register your dealership yard for subscription SaaS
+              Join as an individual car buyer or register your dealership yard for SaaS inventory management
             </p>
           </div>
 
@@ -165,41 +192,93 @@ export default function RegisterPage() {
             </div>
 
             {role === "seller" && (
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                <p className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">
-                  Dealership Details
-                </p>
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">Business Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="e.g. Zanzibar Auto Hub"
-                    className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
-                  />
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">
+                      Select Dealership Subscription Plan
+                    </p>
+                    <Link href="/pricing" target="_blank" className="text-[10px] text-red-600 font-bold hover:underline">
+                      View full plan details
+                    </Link>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {plans.map((p) => {
+                      const isSel = selectedPlan === p.slug;
+                      return (
+                        <button
+                          key={p.slug}
+                          type="button"
+                          onClick={() => setSelectedPlan(p.slug)}
+                          className={`p-2.5 rounded-xl border text-left transition ${
+                            isSel
+                              ? "bg-red-50 border-red-500 ring-1 ring-red-500"
+                              : "bg-white border-slate-200 hover:border-slate-300"
+                          }`}
+                        >
+                          <div className="text-[11px] font-bold text-slate-900">{p.name}</div>
+                          <div className="text-[10px] font-semibold text-red-600">{p.price}</div>
+                          <div className="text-[9px] text-slate-500 mt-0.5">{p.listings}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {selectedPlan === "free" ? (
+                    <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-800 flex items-center gap-2 font-medium">
+                      <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Free tier activates automatically upon registration. No payment required.</span>
+                    </div>
+                  ) : (
+                    <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-[11px] text-amber-900 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <Clock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                        <span>Account placed ON HOLD until payment approval</span>
+                      </div>
+                      <p className="text-[10px] text-amber-800 leading-relaxed">
+                        An invoice will be generated in your dashboard. Once you submit payment reference via M-Pesa / Tigo Pesa or Bank Transfer, Swahivo admins will verify and approve your account to go live.
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">Showroom Location</label>
-                  <input
-                    type="text"
-                    required
-                    value={businessLocation}
-                    onChange={(e) => setBusinessLocation(e.target.value)}
-                    placeholder="e.g. Kiembe Samaki, Zanzibar"
-                    className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">Business Description</label>
-                  <textarea
-                    rows={2}
-                    value={businessDescription}
-                    onChange={(e) => setBusinessDescription(e.target.value)}
-                    placeholder="Types of cars and imports..."
-                    className="w-full p-2.5 text-xs border border-slate-300 rounded-xl bg-white"
-                  />
+
+                <div className="space-y-3 pt-2 border-t border-slate-200">
+                  <p className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">
+                    Showroom Profile
+                  </p>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Business / Yard Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      placeholder="e.g. Zanzibar Auto Hub"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Showroom Location</label>
+                    <input
+                      type="text"
+                      required
+                      value={businessLocation}
+                      onChange={(e) => setBusinessLocation(e.target.value)}
+                      placeholder="e.g. Plot 42, Airport Road, Kiembe Samaki, Zanzibar"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Business Description</label>
+                    <textarea
+                      rows={2}
+                      value={businessDescription}
+                      onChange={(e) => setBusinessDescription(e.target.value)}
+                      placeholder="Specialization, Japanese/European direct imports, warranty..."
+                      className="w-full p-2.5 text-xs border border-slate-300 rounded-xl bg-white"
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -224,7 +303,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition shadow-md disabled:opacity-50"
             >
-              {loading ? "Registering..." : "Create Account"}
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 

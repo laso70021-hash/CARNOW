@@ -32,11 +32,11 @@ export default function ContactPage() {
             GET IN TOUCH
           </span>
           <h1 className="text-3xl font-extrabold text-slate-900">
-            Contact Swahivo Car Dealership
+            Contact Swahivo Company
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mt-1">
             Our team in Zanzibar and Dar es Salaam is available 6 days a week to assist with vehicle inspections,
-            dealer onboarding, and financing.
+            dealer onboarding, title transfers, and financing.
           </p>
         </div>
 
@@ -44,9 +44,12 @@ export default function ContactPage() {
           {/* Contact Details */}
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Showroom & Office Locations
-              </h3>
+              <div className="border-b border-slate-100 pb-3">
+                <span className="text-xs font-black text-red-600 uppercase tracking-widest">Swahivo Company</span>
+                <h3 className="text-base font-bold text-slate-900 mt-0.5">
+                  Showroom & Office Locations
+                </h3>
+              </div>
 
               <div className="space-y-4 text-xs text-slate-600">
                 <div className="flex items-start gap-3">
@@ -68,14 +71,14 @@ export default function ContactPage() {
                 <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
                   <Phone className="w-4 h-4 text-red-600 shrink-0" />
                   <span>
-                    Direct Line: <strong className="text-slate-900">+255 770 565 656</strong>
+                    Direct Line: <strong className="text-slate-900">+255 674 766 586</strong>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <Mail className="w-4 h-4 text-red-600 shrink-0" />
                   <span>
-                    Email: <strong className="text-slate-900">auto.link@yahoo.com</strong>
+                    Email: <strong className="text-slate-900">hello@swahivo.com</strong>
                   </span>
                 </div>
 
@@ -92,12 +95,12 @@ export default function ContactPage() {
                 Our customer concierge is online on WhatsApp for immediate vehicle quotes and test drive schedules.
               </p>
               <a
-                href="https://wa.me/255770565656"
+                href="https://wa.me/255674766586"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-md"
               >
-                <span>Chat with Concierge</span>
+                <span>Chat with Concierge (+255 674 766 586)</span>
               </a>
             </div>
           </div>

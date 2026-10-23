@@ -15,28 +15,28 @@ export default function ServicesPage() {
       desc: "Fast, stress-free vehicle registration, logbook transfer, custom duty clearance, and number plate issuance across Tanzania and Zanzibar.",
       price: "From TZS 250,000",
       icon: FileText,
-      phone: "+255 770 565 656",
+      phone: "+255 674 766 586",
     },
     {
       title: "Comprehensive Pre-Purchase Inspection (150 Points)",
       desc: "Detailed mechanical, computerized OBD diagnostic, structural chassis, engine compression, and paint thickness evaluation by certified engineers.",
       price: "TZS 180,000",
       icon: ShieldCheck,
-      phone: "+255 770 565 656",
+      phone: "+255 674 766 586",
     },
     {
       title: "Inter-City Vehicle Carrier & Shipping (Dar to Zanzibar)",
       desc: "Insured vehicle transport between Dar es Salaam, Zanzibar ports, Arusha, Mwanza, Dodoma, and Mbeya on hydraulic flatbed trailers.",
       price: "From TZS 450,000",
       icon: Truck,
-      phone: "+255 770 565 656",
+      phone: "+255 674 766 586",
     },
     {
       title: "Scheduled Maintenance & Minor/Major Service",
       desc: "Synthetic engine oil replacement, genuine oil filter, spark plugs, brake pads check, air filters, and suspension greasing.",
       price: "From TZS 150,000",
       icon: Wrench,
-      phone: "+255 770 565 656",
+      phone: "+255 674 766 586",
     },
   ];
 
@@ -47,13 +47,13 @@ export default function ServicesPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         <div>
           <span className="text-xs font-bold text-red-600 uppercase tracking-widest">
-            AUTOMOTIVE SOLUTIONS
+            AUTOMOTIVE SOLUTIONS • SWAHIVO COMPANY
           </span>
           <h1 className="text-3xl font-extrabold text-slate-900">
             Professional Dealership Services
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mt-1">
-            From technical pre-purchase inspections to TRA logbook registration and port clearing, Swahivo provides end-to-end auto ownership services.
+            From technical pre-purchase inspections to TRA logbook registration and port clearing, Swahivo Company provides end-to-end auto ownership services.
           </p>
         </div>
 
@@ -72,7 +72,7 @@ export default function ServicesPage() {
               </div>
 
               <a
-                href={`https://wa.me/255770565656?text=${encodeURIComponent(`Hello Swahivo, I want to book: ${srv.title}`)}`}
+                href={`https://wa.me/255674766586?text=${encodeURIComponent(`Hello Swahivo, I want to book: ${srv.title}`)}`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-2.5 bg-slate-900 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2"

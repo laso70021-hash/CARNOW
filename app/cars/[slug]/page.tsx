@@ -118,7 +118,7 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
     setTimeout(() => setOrderPlaced(false), 4000);
   };
 
-  const whatsappLink = `https://wa.me/255770565656?text=${encodeURIComponent(
+  const whatsappLink = `https://wa.me/255674766586?text=${encodeURIComponent(
     `Hello Swahivo, I want to inspect/buy the ${vehicle.title} (${vehicle.year}) listed for ${formatPrice(vehicle.priceTzs)}. Reference slug: ${slug}`
   )}`;
 
@@ -298,6 +298,115 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
                   </div>
                 </div>
               )}
+
+              {/* Optional Value-Added Services */}
+              <div className="pt-4 border-t border-slate-100 space-y-4">
+                <div>
+                  <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest">
+                    OPTIONAL DEALER SERVICES
+                  </span>
+                  <h3 className="text-sm font-bold text-slate-900 mt-0.5">
+                    Add-On Automotive Ownership Services
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Optionally available with this vehicle from Swahivo Company and verified partners.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col justify-between space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-slate-900">TRA Registration & Title Transfer</h4>
+                        <span className="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded">
+                          From TZS 250,000
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                        Fast, stress-free vehicle registration, logbook transfer, custom duty clearance, and number plate issuance across Tanzania and Zanzibar.
+                      </p>
+                    </div>
+                    <a
+                      href={`https://wa.me/255674766586?text=${encodeURIComponent(`Hello Swahivo, I want to book TRA Registration & Title Transfer Service for ${vehicle.title} (${slug})`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-2 bg-slate-900 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Book Service Now</span>
+                    </a>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col justify-between space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-slate-900">Pre-Purchase Inspection (150 Pts)</h4>
+                        <span className="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded">
+                          TZS 180,000
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                        Detailed mechanical, computerized OBD diagnostic, structural chassis, engine compression, and paint thickness evaluation by certified engineers.
+                      </p>
+                    </div>
+                    <a
+                      href={`https://wa.me/255674766586?text=${encodeURIComponent(`Hello Swahivo, I want to book Comprehensive Pre-Purchase Inspection (150 Points) for ${vehicle.title} (${slug})`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-2 bg-slate-900 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Book Service Now</span>
+                    </a>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col justify-between space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-slate-900">Inter-City Carrier & Shipping</h4>
+                        <span className="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded">
+                          From TZS 450,000
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                        Insured vehicle transport between Dar es Salaam, Zanzibar ports, Arusha, Mwanza, Dodoma, and Mbeya on hydraulic flatbed trailers.
+                      </p>
+                    </div>
+                    <a
+                      href={`https://wa.me/255674766586?text=${encodeURIComponent(`Hello Swahivo, I want to book Inter-City Vehicle Carrier & Shipping for ${vehicle.title} (${slug})`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-2 bg-slate-900 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Book Service Now</span>
+                    </a>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col justify-between space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-slate-900">Scheduled Minor & Major Service</h4>
+                        <span className="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded">
+                          From TZS 150,000
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                        Synthetic engine oil replacement, genuine oil filter, spark plugs, brake pads check, air filters, and suspension greasing.
+                      </p>
+                    </div>
+                    <a
+                      href={`https://wa.me/255674766586?text=${encodeURIComponent(`Hello Swahivo, I want to book Scheduled Maintenance & Service for ${vehicle.title} (${slug})`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-2 bg-slate-900 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Book Service Now</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

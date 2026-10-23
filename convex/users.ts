@@ -34,6 +34,7 @@ export const login = mutation({
       role: user.role,
       phone: user.phone,
       avatarUrl: user.avatarUrl,
+      status: user.status,
     };
   },
 });
@@ -48,6 +49,7 @@ export const register = mutation({
     businessName: v.optional(v.string()),
     businessLocation: v.optional(v.string()),
     businessDescription: v.optional(v.string()),
+    planSlug: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const emailNorm = args.email.trim().toLowerCase();
@@ -68,6 +70,10 @@ export const register = mutation({
     const safeRole = args.role === "seller" ? "seller" : "buyer";
     const passwordHash = await hashPassword(args.password);
 
+    // Free plan activates automatically. Paid plans place seller on hold until payment and admin approval.
+    const isFreePlan = !args.planSlug || args.planSlug.toLowerCase() === "free";
+    const initialStatus = safeRole === "seller" ? (isFreePlan ? "active" : "on_hold") : "active";
+
     const userId = await ctx.db.insert("users", {
       name: args.name.trim(),
       email: emailNorm,
@@ -75,11 +81,11 @@ export const register = mutation({
       role: safeRole,
       phone: args.phone,
       avatarUrl: safeRole === "seller" ? "/assets/aistudio/logo_52dfade8.png" : undefined,
-      status: "active",
+      status: initialStatus,
       createdAt: Date.now(),
     });
 
-    // If seller signup, create pending dealer application and profile
+    // If seller signup, create dealer profile, application and subscription
     if (safeRole === "seller") {
       const bName = args.businessName || `${args.name}'s Dealership`;
       const bLocation = args.businessLocation || "Dar es Salaam, Tanzania";
@@ -91,7 +97,7 @@ export const register = mutation({
         slug: bName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
         location: bLocation,
         address: bLocation,
-        phone: args.phone || "+255 770 000 000",
+        phone: args.phone || "+255 674 766 586",
         email: emailNorm,
         description: bDesc,
         rating: 5.0,
@@ -111,31 +117,86 @@ export const register = mutation({
         phone: args.phone || "",
         email: emailNorm,
         description: bDesc,
-        status: "pending",
+        status: isFreePlan ? "approved" : "pending",
         createdAt: Date.now(),
       });
 
-      // Assign default Free subscription
-      const freePlan = await ctx.db
+      // Find the chosen subscription plan
+      const targetSlug = args.planSlug?.toLowerCase() || "free";
+      const targetPlan = await ctx.db
+        .query("subscriptionPlans")
+        .withIndex("by_slug", (q) => q.eq("slug", targetSlug))
+        .first();
+
+      const freePlan = targetSlug === "free" ? targetPlan : await ctx.db
         .query("subscriptionPlans")
         .withIndex("by_slug", (q) => q.eq("slug", "free"))
         .first();
 
-      if (freePlan) {
-        await ctx.db.insert("dealerSubscriptions", {
-          userId,
-          dealerId: dealerProfileId,
-          planId: freePlan._id,
-          planName: freePlan.name,
-          status: "active",
-          listingLimit: freePlan.listingLimit,
-          currentActiveListings: 0,
-          startDate: Date.now(),
-          endDate: Date.now() + 365 * 24 * 60 * 60 * 1000,
-          autoRenew: true,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        });
+      const activePlan = targetPlan || freePlan;
+
+      if (activePlan) {
+        if (!isFreePlan && activePlan.priceMonthlyTzs > 0) {
+          // Generate pending invoice for paid plan
+          const invoiceNum = `INV-${Date.now().toString().slice(-6)}`;
+          const invoiceId = await ctx.db.insert("subscriptionInvoices", {
+            invoiceNumber: invoiceNum,
+            userId,
+            dealerId: dealerProfileId,
+            planId: activePlan._id,
+            planName: activePlan.name,
+            amountTzs: activePlan.priceMonthlyTzs,
+            amountUsd: Math.round(activePlan.priceMonthlyTzs * 0.000385),
+            currency: "TZS",
+            status: "pending",
+            dueDate: Date.now() + 7 * 24 * 60 * 60 * 1000,
+            notes: `Initial subscription setup for ${activePlan.name} tier. Account pending payment & admin verification.`,
+            createdAt: Date.now(),
+          });
+
+          // Subscription in on_hold/past_due state
+          await ctx.db.insert("dealerSubscriptions", {
+            userId,
+            dealerId: dealerProfileId,
+            planId: activePlan._id,
+            planName: activePlan.name,
+            status: "past_due",
+            listingLimit: activePlan.listingLimit,
+            currentActiveListings: 0,
+            startDate: Date.now(),
+            endDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+            autoRenew: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+
+          // Notification to seller
+          await ctx.db.insert("notifications", {
+            userId,
+            title: "Account On Hold - Payment Pending",
+            message: `Your seller account was registered for the ${activePlan.name} tier. Please complete payment of ${activePlan.priceMonthlyTzs.toLocaleString()} TZS (Invoice ${invoiceNum}) to activate your listings.`,
+            type: "subscription",
+            link: "/seller/dashboard/subscription",
+            isRead: false,
+            createdAt: Date.now(),
+          });
+        } else {
+          // Free plan activated automatically
+          await ctx.db.insert("dealerSubscriptions", {
+            userId,
+            dealerId: dealerProfileId,
+            planId: activePlan._id,
+            planName: activePlan.name,
+            status: "active",
+            listingLimit: activePlan.listingLimit,
+            currentActiveListings: 0,
+            startDate: Date.now(),
+            endDate: Date.now() + 365 * 24 * 60 * 60 * 1000,
+            autoRenew: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+        }
       }
     }
 
@@ -145,6 +206,7 @@ export const register = mutation({
       email: emailNorm,
       role: safeRole,
       phone: args.phone,
+      status: initialStatus,
     };
   },
 });
