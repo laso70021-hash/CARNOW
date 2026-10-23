@@ -12,6 +12,7 @@ export default defineSchema({
     avatarUrl: v.optional(v.string()),
     status: v.string(), // "active" | "suspended"
     createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   }).index("by_email", ["email"]).index("by_role", ["role"]),
 
   // Dealership Profiles
@@ -257,7 +258,8 @@ export default defineSchema({
     priceTzs: v.number(),
     condition: v.string(), // "New" | "Used"
     image: v.string(),
-    sellerId: v.id("users"),
+    sellerId: v.optional(v.id("users")),
+    sellerName: v.optional(v.string()),
     stock: v.number(),
     description: v.string(),
     status: v.string(),

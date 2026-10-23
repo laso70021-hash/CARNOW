@@ -28,17 +28,23 @@ import {
   Edit,
   SlidersHorizontal,
 } from "lucide-react";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import dynamic from "next/dynamic";
+
+const AdminTrendLineChart = dynamic(
+  () => import("@/components/dashboard/AdminCharts").then((mod) => mod.AdminTrendLineChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-full flex items-center justify-center text-xs text-slate-400">Loading chart...</div>,
+  }
+);
+
+const AdminCategoryPieChart = dynamic(
+  () => import("@/components/dashboard/AdminCharts").then((mod) => mod.AdminCategoryPieChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-full flex items-center justify-center text-xs text-slate-400">Loading chart...</div>,
+  }
+);
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -136,9 +142,10 @@ export default function AdminDashboardPage() {
 
   const handleSavePlan = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingPlan) return;
+    if (!editingPlan || !user) return;
     try {
       await updatePlanMutation({
+        adminUserId: user.userId,
         planId: editingPlan._id,
         name: editingPlan.name,
         priceMonthlyTzs: Number(editingPlan.priceMonthlyTzs),
@@ -381,15 +388,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="h-64 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={stats?.enquiriesAndSalesTrends || []}>
-                        <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
-                        <YAxis stroke="#94a3b8" fontSize={11} />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="enquiries" stroke="#EF4444" strokeWidth={2.5} dot={{ r: 3 }} />
-                        <Line type="monotone" dataKey="sales" stroke="#3B82F6" strokeWidth={2.5} dot={{ r: 3 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    <AdminTrendLineChart trends={stats?.enquiriesAndSalesTrends || []} />
                   </div>
                 </div>
 
@@ -401,22 +400,10 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="h-44 w-full relative flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={stats?.categoryBreakdown || []}
-                          innerRadius={50}
-                          outerRadius={70}
-                          paddingAngle={3}
-                          dataKey="count"
-                        >
-                          {(stats?.categoryBreakdown || []).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    <AdminCategoryPieChart
+                      categoryBreakdown={stats?.categoryBreakdown || []}
+                      colors={["#EF4444", "#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#06B6D4"]}
+                    />
                     <div className="absolute text-center">
                       <span className="text-2xl font-black text-slate-800">{stats?.totalVehicles || 246}</span>
                       <p className="text-[10px] text-slate-400 font-bold uppercase">Total</p>

@@ -39,19 +39,23 @@ import {
   Wrench,
   Image as ImageIcon,
 } from "lucide-react";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-} from "recharts";
+import dynamic from "next/dynamic";
+
+const SellerTrendLineChart = dynamic(
+  () => import("@/components/dashboard/SellerCharts").then((mod) => mod.SellerTrendLineChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-full flex items-center justify-center text-xs text-slate-400">Loading chart...</div>,
+  }
+);
+
+const SellerStatusPieChart = dynamic(
+  () => import("@/components/dashboard/SellerCharts").then((mod) => mod.SellerStatusPieChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-full flex items-center justify-center text-xs text-slate-400">Loading chart...</div>,
+  }
+);
 import { PaymentModal } from "@/components/modals/PaymentModal";
 
 export default function SellerDashboardPage() {
@@ -699,15 +703,7 @@ export default function SellerDashboardPage() {
                   </div>
 
                   <div className="h-64 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={stats?.monthlyTrends || []}>
-                        <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
-                        <YAxis stroke="#94a3b8" fontSize={11} />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="enquiries" stroke="#EF4444" strokeWidth={2.5} dot={{ r: 3 }} />
-                        <Line type="monotone" dataKey="orders" stroke="#3B82F6" strokeWidth={2.5} dot={{ r: 3 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    <SellerTrendLineChart trends={stats?.monthlyTrends || []} />
                   </div>
                 </div>
 
@@ -719,22 +715,10 @@ export default function SellerDashboardPage() {
                   </div>
 
                   <div className="h-44 w-full relative flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={statusPieData}
-                          innerRadius={50}
-                          outerRadius={70}
-                          paddingAngle={4}
-                          dataKey="value"
-                        >
-                          {statusPieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    <SellerStatusPieChart
+                      statusData={statusPieData}
+                      colors={["#10B981", "#EF4444", "#94A3B8"]}
+                    />
                     <div className="absolute text-center">
                       <span className="text-2xl font-black text-slate-800">{stats?.totalVehicles || 18}</span>
                       <p className="text-[10px] text-slate-400 font-bold uppercase">Total</p>

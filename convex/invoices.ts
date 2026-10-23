@@ -75,6 +75,11 @@ export const adminVerifyPayment = mutation({
     const invoice = await ctx.db.get(args.invoiceId);
     if (!invoice) throw new Error("Invoice not found");
 
+    const admin = await ctx.db.get(args.adminUserId);
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized: Only administrators can verify subscription payments");
+    }
+
     const payment = await ctx.db
       .query("subscriptionPayments")
       .withIndex("by_invoice", (q) => q.eq("invoiceId", args.invoiceId))

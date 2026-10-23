@@ -47,8 +47,20 @@ export default function AccessoriesPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
+interface AccessoryItem {
+  _id: string;
+  title: string;
+  category: string;
+  priceTzs: number;
+  condition: string;
+  stock: number;
+  image?: string;
+  sellerName?: string;
+  description?: string;
+}
+
   // Fallback seed accessories
-  const defaultAccessories = [
+  const defaultAccessories: AccessoryItem[] = [
     {
       _id: "default-1",
       title: "Toyota Prado & LC300 Alloy Rim Set (20 inch)",
@@ -161,10 +173,13 @@ export default function AccessoriesPage() {
   };
 
   // Combine DB accessories with default fallbacks
-  const displayedAccessories =
+  const displayedAccessories: AccessoryItem[] =
     dbAccessories && dbAccessories.length > 0
       ? [
-          ...dbAccessories,
+          ...dbAccessories.map((item) => ({
+            ...item,
+            sellerName: (item as { sellerName?: string }).sellerName || "Swahivo Verified Dealer",
+          })),
           ...defaultAccessories.filter(
             (def) => selectedCat === "All" || def.category === selectedCat
           ),

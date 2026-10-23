@@ -250,13 +250,18 @@ export const listAllUsers = query({
 
 export const updateUserRole = mutation({
   args: {
+    adminUserId: v.id("users"),
     userId: v.id("users"),
     role: v.string(),
   },
   handler: async (ctx, args) => {
+    const admin = await ctx.db.get(args.adminUserId);
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized: Only administrators can modify user roles");
+    }
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("User not found");
-    await ctx.db.patch(args.userId, { role: args.role });
+    await ctx.db.patch(args.userId, { role: args.role, updatedAt: Date.now() });
     return { success: true };
   },
 });

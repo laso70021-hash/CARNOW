@@ -21,6 +21,7 @@ export const getPlanBySlug = query({
 
 export const adminUpdatePlan = mutation({
   args: {
+    adminUserId: v.optional(v.id("users")),
     planId: v.id("subscriptionPlans"),
     name: v.string(),
     priceMonthlyTzs: v.number(),
@@ -31,6 +32,12 @@ export const adminUpdatePlan = mutation({
     isActive: v.boolean(),
   },
   handler: async (ctx, args) => {
+    if (args.adminUserId) {
+      const admin = await ctx.db.get(args.adminUserId);
+      if (!admin || admin.role !== "admin") {
+        throw new Error("Unauthorized: Only administrators can update subscription tiers");
+      }
+    }
     const plan = await ctx.db.get(args.planId);
     if (!plan) throw new Error("Plan not found");
 

@@ -27,6 +27,11 @@ export const approveApplication = mutation({
     const app = await ctx.db.get(args.applicationId);
     if (!app) throw new Error("Application not found");
 
+    const admin = await ctx.db.get(args.adminUserId);
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized: Only administrators can approve dealer applications");
+    }
+
     await ctx.db.patch(args.applicationId, {
       status: "approved",
       reviewedBy: args.adminUserId,
@@ -75,6 +80,11 @@ export const rejectApplication = mutation({
   handler: async (ctx, args) => {
     const app = await ctx.db.get(args.applicationId);
     if (!app) throw new Error("Application not found");
+
+    const admin = await ctx.db.get(args.adminUserId);
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized: Only administrators can reject dealer applications");
+    }
 
     await ctx.db.patch(args.applicationId, {
       status: "rejected",
