@@ -1,0 +1,1232 @@
+# MASTER BUILD PROMPT — SWAHIVO CARS
+## Production-Grade Multi-Vendor Automotive SaaS Marketplace with Convex Backend
+
+### 1. YOUR ROLE
+
+Act as a Principal SaaS Architect, Senior Full-Stack Engineer, Convex Backend Architect, React Engineer, UI/UX Designer, Authentication Engineer, and Quality Assurance Lead.
+
+Build **SWAHIVO CARS**, a complete multi-vendor car dealership marketplace and subscription SaaS for Tanzania, Zanzibar, and East Africa.
+
+This is a real commercial platform, not a demonstration, simulation, or static prototype.
+
+The application must support:
+
+- Public automotive marketplace
+- Individual buyers
+- Individual sellers
+- Professional car dealerships
+- Marketplace administrators
+- Dealer subscription packages
+- Vehicle listing limits
+- Inventory management
+- Vehicle image uploads
+- Vehicle enquiries and messaging
+- Test-drive bookings
+- Financing enquiries
+- Orders and reservations
+- Accessories marketplace
+- Vehicle services
+- Advertising and promoted listings
+- Analytics and reporting
+- Subscription billing
+- Admin platform management
+
+**IMPORTANT EXISTING PROJECT REQUIREMENT**
+
+If the current Google AI Studio workspace already contains Swahivo Car Dealership, inspect its source code first.
+
+Preserve its working pages, existing UI design, logos, colors, components, route structure, and business functionality.
+
+Replace the problematic Supabase backend integration with Convex incrementally.
+
+Do not rebuild the existing frontend unnecessarily.
+
+If starting from an empty workspace, build the complete system following these specifications.
+
+---
+
+# 2. STRICT TECHNOLOGY STACK
+
+Frontend:
+
+- Vite
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- React Router
+- Lucide React icons
+- React Hook Form
+- Zod
+- Recharts
+
+Backend:
+
+- Convex
+- Convex Database
+- Convex Queries
+- Convex Mutations
+- Convex Actions
+- Convex File Storage
+- Convex Scheduled Functions
+- Convex Authentication integration
+- Convex HTTP Actions for webhooks where appropriate
+
+Use the official Convex TypeScript and React SDK.
+
+Install:
+
+```bash
+npm install convex
+```
+
+Initialize the Convex project through the supported Convex CLI workflow:
+
+```bash
+npx convex dev
+```
+
+The CLI may require authentication, project creation, or a deployment selection. Do not claim backend deployment is complete until those steps succeed.
+
+For this Vite project, configure the deployment URL:
+
+```env
+VITE_CONVEX_URL=https://YOUR-ACTUAL-DEPLOYMENT.convex.cloud
+```
+
+The deployment URL must come from the actual user's Convex deployment.
+
+Never fabricate a deployment URL or deploy to an unrelated Convex account.
+
+Do not use Supabase as the active backend after the migration is complete.
+
+---
+
+# 3. CONVEX BACKEND CONNECTION
+
+Use a single Convex client throughout the React application.
+
+Configure:
+
+`src/main.tsx`
+
+```tsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import {
+  ConvexProvider,
+  ConvexReactClient,
+} from "convex/react";
+
+import App from "./App";
+
+const url = import.meta.env.VITE_CONVEX_URL;
+
+if (!url) {
+  throw new Error("Missing VITE_CONVEX_URL");
+}
+
+const convex = new ConvexReactClient(url);
+
+ReactDOM.createRoot(
+  document.getElementById("root")!
+).render(
+  <React.StrictMode>
+    <ConvexProvider client={convex}>
+      <App />
+    </ConvexProvider>
+  </React.StrictMode>
+);
+```
+
+If using an authentication integration requiring a specialized provider, replace the provider wiring with the officially documented authenticated variant.
+
+Create backend code under:
+
+`convex/`
+
+Use generated Convex API references:
+
+`convex/_generated/api`
+
+Frontend data retrieval must use:
+
+`useQuery()`
+
+Frontend database mutations must use:
+
+`useMutation()`
+
+External service operations must use appropriate Convex actions or HTTP actions.
+
+Do not use generic HTTP API calls where the native Convex client is the better option.
+
+---
+
+# 4. REAL AUTHENTICATION SYSTEM
+
+Implement genuine authentication.
+
+For a Vite React SPA, evaluate the current official Convex Auth integration and implement password authentication with email verification and password reset.
+
+Convex Auth is a beta library. If its current capabilities are unsuitable for production requirements, use a supported production authentication provider integrated with Convex.
+
+Do not implement custom password hashing, token issuance, or session handling.
+
+Account types:
+
+1. Buyer
+2. Seller
+3. Administrator
+
+Authentication screens:
+
+- Login
+- Register
+- Forgot Password
+- Reset Password
+- Verify Email
+- Logout
+- Account Settings
+
+Seller signup must collect:
+
+- Full name
+- Email
+- Phone
+- Password
+- Business name
+- Business location
+- Business description
+- Optional business registration information
+
+Buyer signup must collect:
+
+- Full name
+- Email
+- Phone
+- Password
+
+Users must not be able to assign themselves administrator permissions.
+
+Seller registration creates a pending application.
+
+Seller privileges are granted only through a trusted administrative approval process.
+
+Implement role-based access in both frontend routes and Convex backend functions.
+
+Role checks must derive identity from the verified authentication context.
+
+Never trust a role or seller ID supplied by the browser.
+
+---
+
+# 5. DATABASE ARCHITECTURE
+
+Create:
+
+`convex/schema.ts`
+
+Use Convex schema definitions, validators, and indexes.
+
+Design the database around the following domain entities.
+
+## Identity and dealership management
+
+`users`
+
+`dealerProfiles`
+
+`dealerApplications`
+
+`dealerTeamMembers`
+
+`dealerInvitations`
+
+## Vehicle inventory
+
+`vehicles`
+
+`vehicleImages`
+
+`vehicleBrands`
+
+`vehicleCategories`
+
+`vehicleSpecifications`
+
+`vehicleDocuments`
+
+`vehicleStatusHistory`
+
+## Marketplace transactions
+
+`orders`
+
+`orderItems`
+
+`enquiries`
+
+`enquiryMessages`
+
+`bookings`
+
+`favorites`
+
+`reviews`
+
+`notifications`
+
+## Additional services
+
+`accessories`
+
+`accessoryImages`
+
+`services`
+
+`financingApplications`
+
+`vehicleValuations`
+
+## SaaS billing
+
+`subscriptionPlans`
+
+`dealerSubscriptions`
+
+`subscriptionInvoices`
+
+`subscriptionPayments`
+
+`subscriptionEvents`
+
+`featureEntitlements`
+
+`exchangeRates`
+
+## Advertising
+
+`advertisingCampaigns`
+
+`promotedListings`
+
+`advertisingPayments`
+
+## Administration
+
+`websiteSettings`
+
+`auditLogs`
+
+`supportTickets`
+
+`newsletterSubscribers`
+
+`platformAnnouncements`
+
+Use Convex document identifiers and references.
+
+Do not assume existing PostgreSQL UUIDs are Convex document IDs.
+
+Maintain an explicit legacy ID mapping during migration if existing data must be imported.
+
+Use suitable indexes for owner IDs, vehicle status, created timestamps, subscription status, categories, brands, and frequently used filters.
+
+Validate all external arguments.
+
+Implement pagination rather than loading the entire database into the browser.
+
+Avoid duplicating customer, seller, or order information unnecessarily.
+
+---
+
+# 6. SIX DEALER SUBSCRIPTION PACKAGES
+
+Implement exactly six pricing tiers.
+
+| Plan | Monthly Price | Active Listing Limit |
+|---|---:|---:|
+| Free | TSh 0 | 1 |
+| Starter | TSh 49,000 | 10 |
+| Growth | TSh 99,000 | 30 |
+| Professional | TSh 199,000 | 50 |
+| Business | TSh 299,000 | 100 |
+| Enterprise | TSh 399,000 | 200 |
+
+Store plans as actual Convex database records.
+
+Prices and entitlements must be editable in the Admin Dashboard.
+
+Do not rely on hardcoded frontend prices as the production source of truth.
+
+### Free
+
+- 1 active vehicle
+- 5 photos per vehicle
+- Basic dealer dashboard
+- Basic buyer enquiries
+- Edit and manage listing
+- No monthly subscription charge
+
+### Starter
+
+- 10 active vehicles
+- 10 photos per vehicle
+- Buyer enquiry management
+- Basic inventory analytics
+- Standard support
+
+### Growth
+
+- 30 active vehicles
+- 15 photos per vehicle
+- Dealer CRM
+- Featured listing tools
+- Inventory statistics
+- Vehicle valuation
+
+### Professional
+
+- 50 active vehicles
+- 20 photos per vehicle
+- Advanced reporting
+- Vehicle valuation
+- Lead management
+- Priority support
+
+### Business
+
+- 100 active vehicles
+- 25 photos per vehicle
+- AI inventory insights
+- Multi-staff dealer access
+- Advanced sales analytics
+- Promotion management
+
+### Enterprise
+
+- 200 active vehicles
+- 30 photos per vehicle
+- Complete dealership analytics
+- AI Assistant
+- Sourcing analytics
+- Advanced CRM
+- Multi-staff roles
+- Highest-tier support
+
+Featured listing tools do not imply unlimited free promotions. Promotion credits and costs must be configured separately.
+
+---
+
+# 7. TZS / USD CURRENCY SWITCH
+
+Pricing page must have a working currency toggle.
+
+Default:
+
+TZS
+
+Alternative:
+
+USD
+
+Display example:
+
+TZS: TSh 49,000
+
+USD: Estimated amount calculated from the currently configured exchange rate.
+
+Implement:
+
+`exchangeRates`
+
+Store:
+
+- Base currency
+- Quote currency
+- Rate
+- Source
+- Updated timestamp
+
+Use a trusted foreign-exchange provider through a backend action if configured.
+
+Admin must be able to set a fallback rate.
+
+When no reliable current rate exists, show the last known rate and its timestamp or an explicit unavailable state.
+
+The selected display currency must update all pricing cards and comparisons.
+
+Store the currency preference for the current user where appropriate.
+
+**Payment billing remains in TZS unless a real USD payment settlement workflow is configured.**
+
+Never treat switching a display currency as changing the underlying subscription contract.
+
+---
+
+# 8. SUBSCRIPTION AND LISTING LIMITS
+
+Every dealer must have a subscription or a defined Free entitlement.
+
+Enforce listing limits on the backend.
+
+Example:
+
+Free — 1 active listing.
+
+When the seller attempts to activate a second vehicle, reject the activation and return a clear listing-limit error.
+
+Starter — 10 active listings.
+
+Growth — 30.
+
+Professional — 50.
+
+Business — 100.
+
+Enterprise — 200.
+
+The enforcement must happen in Convex mutations, not only React.
+
+Use Convex's transactional mutation model to avoid race conditions when two listings are activated simultaneously.
+
+Listing approval rules:
+
+- Seller submits vehicle.
+- Vehicle enters `pending_approval`.
+- Admin reviews the listing.
+- Admin approves or rejects it.
+- Approved vehicle becomes publicly visible when activated.
+- Activation must respect subscription capacity.
+
+Pending, draft, sold, inactive, and archived vehicles should be treated according to clearly defined entitlement rules.
+
+Never delete old vehicles because a seller changes plans.
+
+For downgrade scenarios, preserve inventory and apply documented active-listing restrictions.
+
+---
+
+# 9. PUBLIC WEBSITE
+
+Build or preserve the following public pages.
+
+## Homepage
+
+Hero:
+
+**Find Your Perfect Drive**
+
+Subtitle:
+
+"Discover quality cars from trusted dealers across Tanzania and Zanzibar."
+
+Buttons:
+
+- Browse Cars
+- Sell Your Car
+
+Sections:
+
+- Search Vehicles
+- Featured Vehicles
+- Browse by Category
+- Browse by Brand
+- New Arrivals
+- Popular Dealerships
+- Why Choose Swahivo
+- How It Works
+- Customer Reviews
+- Dealer Subscription CTA
+- Footer
+
+Use live inventory records.
+
+Only display approved publicly available vehicles.
+
+## Vehicle Marketplace
+
+Route:
+
+`/cars`
+
+Filters:
+
+- Brand
+- Model
+- Price range
+- Location
+- New / Used / Pre-Owned
+- Year
+- Mileage
+- Fuel type
+- Transmission
+- Vehicle type
+
+Implement real server-side filtering, pagination, and indexed access.
+
+## Vehicle Details
+
+Route:
+
+`/cars/:slug`
+
+Features:
+
+- Photo gallery
+- Vehicle specifications
+- Seller details
+- Price in TZS
+- WhatsApp enquiry
+- Send enquiry
+- Save vehicle
+- Book test drive
+- Request financing
+- Report listing
+
+All actions must have meaningful behavior and correctly persist relevant records.
+
+## Additional public routes
+
+`/dealers`
+
+`/dealers/:slug`
+
+`/pricing`
+
+`/about`
+
+`/contact`
+
+`/services`
+
+`/accessories`
+
+---
+
+# 10. SELLER DASHBOARD
+
+Route:
+
+`/seller/dashboard`
+
+Use a professional left-sidebar SaaS layout.
+
+Navigation:
+
+- Overview
+- My Vehicles
+- Add Vehicle
+- Inventory Management
+- Buyer Enquiries
+- Messages
+- Bookings
+- Orders
+- Customers / CRM
+- Financing Enquiries
+- Promotions
+- Analytics
+- My Subscription
+- Billing & Invoices
+- Payments
+- Usage & Limits
+- Dealership Profile
+- Team Members
+- Settings
+
+Every sidebar item must open a real page.
+
+No label-only navigation.
+
+## Seller Overview
+
+Show live metrics:
+
+- Active Listings
+- Pending Listings
+- Vehicles Sold
+- New Enquiries
+- Total Views
+- Test-Drive Requests
+- Subscription Plan
+- Remaining Listing Capacity
+
+Use reactive Convex queries.
+
+## Seller Vehicle Creation
+
+Form fields:
+
+- Vehicle title
+- Brand
+- Model
+- Variant
+- Condition
+- Year
+- Mileage
+- Fuel type
+- Transmission
+- Engine capacity
+- Price in TZS
+- Location
+- Description
+- Features
+- Multiple vehicle images
+
+On submission:
+
+1. Validate input.
+2. Verify authenticated seller.
+3. Verify dealership approval.
+4. Validate subscription rules.
+5. Upload files using Convex Storage.
+6. Create the vehicle record through a real mutation.
+7. Associate image storage IDs with the vehicle.
+8. Return the persisted vehicle ID.
+9. Refresh inventory queries automatically.
+10. Show success only after confirmed persistence.
+
+Do not generate fake vehicle IDs.
+
+Do not create fallback local arrays.
+
+Do not suppress backend errors.
+
+---
+
+# 11. ADMIN DASHBOARD
+
+Route:
+
+`/admin/dashboard`
+
+Use a professional administrative interface consistent with Swahivo branding.
+
+Sidebar:
+
+- Dashboard
+- Vehicles
+- Listing Approvals
+- Dealerships
+- Seller Applications
+- Buyers & Users
+- Brands
+- Categories
+- Accessories
+- Services
+- Orders
+- Enquiries
+- Bookings
+- Financing
+- Advertising
+- Subscription Plans
+- Dealer Subscriptions
+- Subscription Payments
+- Invoices
+- Revenue Analytics
+- Currency Settings
+- Content Management
+- Reviews & Moderation
+- Support
+- Audit Logs
+- System Settings
+
+Every page must perform actual backend operations.
+
+## Subscription Plan Administration
+
+Administrator must be able to:
+
+- Edit package name
+- Change listing limits
+- Change monthly price
+- Change feature entitlements
+- Enable/disable plans
+- Change plan descriptions
+- Assign approved subscriptions
+- Review upgrades and downgrades
+
+All changes persist in Convex.
+
+## Seller Approval
+
+Administrator reviews submitted dealer applications.
+
+Approve or reject sellers through authorized backend mutations.
+
+Log the responsible administrator and action timestamp.
+
+Do not allow frontend-only role changes.
+
+---
+
+# 12. BUYER DASHBOARD
+
+Route:
+
+`/account`
+
+Pages:
+
+- Overview
+- Saved Vehicles
+- My Enquiries
+- Messages
+- Test Drive Bookings
+- Orders
+- Financing Requests
+- Notifications
+- Profile
+- Account Settings
+
+Every buyer action must persist in Convex.
+
+Favorites must have unique ownership rules.
+
+Enquiries must be associated with actual vehicles and authorized seller accounts.
+
+Buyers must not access other customers' private records.
+
+---
+
+# 13. REALTIME FEATURES
+
+Use Convex reactive queries instead of implementing a second polling-based data synchronization layer.
+
+Examples:
+
+- Seller receives a new enquiry.
+- Admin receives a new listing approval request.
+- Buyer receives a seller response.
+- Vehicle status updates automatically.
+- Subscription usage updates.
+- Payment verification status changes.
+- Notifications appear in the correct dashboard.
+
+Use indexed queries with authorization checks.
+
+Do not expose other dealers' private information.
+
+---
+
+# 14. CONVEX FILE STORAGE
+
+Use Convex File Storage for:
+
+- Vehicle gallery images
+- Dealer profile pictures
+- Dealership banners
+- Accessory images
+- Authorized business documents
+
+Use generated upload URLs.
+
+After upload, store the returned Convex storage ID in an authorized application document.
+
+Validate file type, size, ownership, and listing photo allowances.
+
+Implement secure upload and deletion controls.
+
+Avoid browser-only base64 persistence.
+
+If an upload succeeds but creating the vehicle record fails, implement a safe cleanup or recovery strategy for unattached files.
+
+---
+
+# 15. PAYMENT AND BILLING SYSTEM
+
+Build a production-ready billing architecture.
+
+Support:
+
+- Subscription invoices
+- Subscription activation
+- Subscription renewals
+- Manual payment review
+- Payment reference recording
+- Payment confirmation
+- Failed payment handling
+- Subscription cancellation
+- Payment history
+
+Prepare integrations for Tanzania-supported mobile money or payment gateway providers.
+
+Do not claim a payment provider is already connected.
+
+Payment activation requires verified payment confirmation from a trusted backend workflow.
+
+Use Convex Actions and HTTP Actions for compatible external gateway requests and webhooks.
+
+Implement:
+
+- Provider signature verification
+- Idempotency
+- Duplicate webhook detection
+- Transaction audit logs
+- Payment-to-invoice reconciliation
+
+Never accept a browser-supplied `paid: true` flag as proof of payment.
+
+Never store payment gateway secret credentials in the Vite frontend.
+
+## Billing scheduler
+
+Use Convex Scheduled Functions or cron jobs for:
+
+- Subscription renewal processing
+- Expiration checks
+- Payment reminders
+- Failed payment follow-ups
+- Trial expiration
+- Invoice generation
+
+Ensure billing operations cannot generate duplicate charges or invoices.
+
+---
+
+# 16. VEHICLE PROMOTIONS
+
+Allow sellers to purchase or request promotion services.
+
+Possible placements:
+
+- Featured homepage vehicles
+- Top search results
+- Category featured listing
+- Dealer spotlight
+- Sponsored vehicle cards
+
+Create promotion records with:
+
+- Dealer
+- Vehicle
+- Placement
+- Price
+- Start date
+- End date
+- Review status
+- Payment status
+- Impression count
+- Click count
+
+Sponsored listings must be visibly labeled.
+
+An advertisement must not become active without required payment verification and approval.
+
+---
+
+# 17. ANALYTICS AND AI TOOLS
+
+Use Recharts for dashboards.
+
+Seller analytics:
+
+- Vehicle views
+- Enquiry count
+- Conversion rate
+- Inventory age
+- Sold vehicles
+- Enquiry sources
+- Subscription usage
+
+Admin analytics:
+
+- Total dealerships
+- Active sellers
+- Active buyers
+- Total vehicles
+- Monthly subscription revenue
+- Plan distribution
+- Subscription cancellations
+- Marketplace enquiries
+- Advertisement revenue
+
+Do not fabricate KPI values.
+
+## AI Assistant
+
+Business and Enterprise packages may have AI functionality according to plan entitlements.
+
+Possible features:
+
+- Inventory aging analysis
+- Vehicle description assistance
+- Pricing suggestions
+- Enquiry summaries
+- Dealership performance summaries
+- Sourcing opportunities
+
+Use an AI service from Convex Actions with securely configured server-side credentials.
+
+AI outputs must be clearly identified as recommendations, not confirmed valuations or financing approvals.
+
+If an AI provider is not configured, show a setup-required state.
+
+Never create simulated AI insights disguised as real results.
+
+---
+
+# 18. MIGRATION FROM EXISTING SUPABASE PROJECT
+
+If the existing application contains Supabase code, migrate carefully.
+
+Do not simply delete Supabase integrations before Convex is operational.
+
+Migration process:
+
+1. Audit all existing Supabase services.
+2. Inventory the existing database entities.
+3. Identify which data must be preserved.
+4. Export existing records through authorized tools.
+5. Create equivalent Convex schema and functions.
+6. Map existing PostgreSQL UUIDs to Convex document IDs.
+7. Plan user authentication migration.
+
+**Authentication migration is especially important:** existing Supabase password hashes or sessions must not be assumed portable to Convex Auth.
+
+Provide a secure password-reset, re-enrollment, or supported identity migration workflow.
+
+8. Migrate vehicle records.
+9. Migrate accessible vehicle images.
+10. Migrate brands and categories.
+11. Migrate orders and enquiries.
+12. Migrate subscriptions if they already exist.
+13. Verify migrated record counts and relationships.
+14. Test Convex reads and writes.
+15. Switch frontend services to Convex.
+16. Remove obsolete Supabase runtime dependencies only after successful verification.
+
+Never delete the old Supabase project or its data automatically.
+
+Treat the old database as a migration source only, not an active second production backend.
+
+---
+
+# 19. REQUIRED CONVEX PROJECT STRUCTURE
+
+Organize the backend into maintainable modules.
+
+Suggested structure:
+
+```text
+convex/
+├── schema.ts
+├── auth.ts
+├── auth.config.ts
+├── users.ts
+├── dealers.ts
+├── dealerApplications.ts
+├── vehicles.ts
+├── vehicleImages.ts
+├── brands.ts
+├── categories.ts
+├── accessories.ts
+├── services.ts
+├── orders.ts
+├── enquiries.ts
+├── messages.ts
+├── bookings.ts
+├── favorites.ts
+├── reviews.ts
+├── subscriptions.ts
+├── subscriptionPlans.ts
+├── invoices.ts
+├── payments.ts
+├── promotions.ts
+├── analytics.ts
+├── storage.ts
+├── notifications.ts
+├── settings.ts
+├── exchangeRates.ts
+├── http.ts
+├── crons.ts
+└── _generated/
+```
+
+Adapt file organization to the actual Convex Auth version and existing project.
+
+Do not manually fabricate generated Convex API files.
+
+---
+
+# 20. SECURITY REQUIREMENTS
+
+Every backend query and mutation must explicitly enforce the appropriate authorization.
+
+Implement:
+
+- Verified authentication
+- Admin permissions
+- Seller ownership
+- Buyer ownership
+- Listing approval permissions
+- Subscription entitlements
+- Server-side input validation
+- Secure payment operations
+- Storage access rules
+- Audit logging
+- Rate limits where appropriate
+
+Do not assume that a Convex function is secure merely because the frontend hides a button.
+
+Use internal functions for sensitive backend-only operations.
+
+Public queries must return only approved public data.
+
+Do not return private email addresses, billing records or administrative notes in public queries.
+
+---
+
+# 21. NO-DEMO ENFORCEMENT
+
+This is the most important requirement.
+
+Do not create:
+
+- Fake login sessions
+- Fake admin accounts
+- Fake seller accounts
+- Demo database arrays
+- Fake API success responses
+- LocalStorage vehicle persistence
+- Placeholder invoices shown as real records
+- Simulated completed payments
+- Hardcoded dashboard KPI values
+- Fake authentication roles
+- Fake subscription activation
+- Inert sidebar items
+- Buttons without working handlers
+
+If a backend operation fails, return the actual error and preserve the user's unsaved form data.
+
+Never convert a backend failure into a successful UI notification.
+
+If database access is not yet configured, show a setup-required or connection-error state.
+
+Do not silently fall back to demo mode.
+
+---
+
+# 22. TESTING AND ACCEPTANCE CRITERIA
+
+Implement and verify:
+
+### Authentication
+
+- Real signup
+- Real login
+- Session persistence
+- Email verification where configured
+- Password reset
+- Logout
+- Admin role protection
+- Seller approval protection
+
+### Vehicles
+
+- Create vehicle
+- Upload images
+- Edit vehicle
+- Approve vehicle
+- Publish vehicle
+- Archive vehicle
+- Reload persisted records
+
+### Packages
+
+- Free: maximum 1 active listing
+- Starter: maximum 10
+- Growth: maximum 30
+- Professional: maximum 50
+- Business: maximum 100
+- Enterprise: maximum 200
+
+Test simultaneous listing activations to verify backend capacity enforcement.
+
+### Billing
+
+- Select plan
+- Create invoice
+- Submit payment
+- Verify payment
+- Activate subscription
+- Renew subscription
+- Expire subscription
+- Cancel subscription
+
+### Currency
+
+- Default TZS display
+- USD estimate display
+- Correct exchange-rate calculation
+- Proper rate freshness disclosure
+- TZS billing remains authoritative
+
+### Dashboards
+
+- All Admin routes work
+- All Seller routes work
+- All Buyer routes work
+- Realtime queries update as expected
+- Data persists after refresh
+
+Run TypeScript validation, production build, unit tests, integration tests and meaningful end-to-end tests.
+
+If a required deployment, authentication provider, payment gateway or test account is unavailable, report the blocker.
+
+Do not claim a test passed if it was not executed.
+
+---
+
+# 23. IMPLEMENTATION SEQUENCE
+
+STAGE 1 — Audit existing project and preserve frontend.
+
+STAGE 2 — Set up Convex deployment and real backend connection.
+
+STAGE 3 — Implement authentication and trusted roles.
+
+STAGE 4 — Create database schema and indexes.
+
+STAGE 5 — Build vehicle listings and image storage.
+
+STAGE 6 — Build public marketplace and filtering.
+
+STAGE 7 — Build six subscription packages.
+
+STAGE 8 — Implement server-enforced listing limits.
+
+STAGE 9 — Build public pricing page with TZS/USD switch.
+
+STAGE 10 — Build complete Seller Dashboard.
+
+STAGE 11 — Build complete Admin Dashboard.
+
+STAGE 12 — Build Buyer Dashboard.
+
+STAGE 13 — Implement real subscription billing.
+
+STAGE 14 — Implement enquiries, messaging, bookings and financing requests.
+
+STAGE 15 — Implement promotions, analytics and AI features.
+
+STAGE 16 — Test end-to-end functionality.
+
+STAGE 17 — Produce a complete implementation and verification report.
+
+Do not proceed past a failed critical foundation without reporting and resolving its blocker.
+
+## FINAL DIRECTIVE
+
+**BUILD SWAHIVO CARS AS A REAL MULTI-VENDOR AUTOMOTIVE SAAS PLATFORM POWERED BY CONVEX.**
+
+Every customer account, seller listing, photo upload, enquiry, booking, subscription, payment record, and administrative change must be handled by genuine backend functionality.
+
+Do not replace proven application functionality with simulations.
+
+Do not redesign the existing application unnecessarily.
+
+The final product must preserve its established brand and provide a fully functional public marketplace, Buyer Dashboard, Seller Dashboard, and Admin Dashboard.
+
+Begin by inspecting the existing codebase and confirming the actual Convex deployment configuration.

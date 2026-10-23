@@ -1,0 +1,6 @@
+{
+  "name": "Swahivo Cars - Dealership SaaS & Marketplace",
+  "description": "Multi-vendor automotive marketplace and dealership SaaS for Tanzania and Zanzibar with live inventory, buyer/seller dashboards, enquiries, bookings, and subscription plans.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
